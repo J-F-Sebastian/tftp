@@ -1,16 +1,16 @@
 #ifndef TFTP_PROTOCOL_H_INCLUDED
 #define TFTP_PROTOCOL_H_INCLUDED
 
-#define TFTP_PORT_NAME "69"
-#define TFTP_PORT_NUM (69)
+#define TFTP_PORT_NAME  "69"
+#define TFTP_PORT_NUM   (69)
 
 /* RFC 1350 */
-#define TFTP_HDR_SIZE (4)
+#define TFTP_HDR_SIZE   (4)
 #define TFTP_DEFAULT_DATA (512)
 
 /* RFC 2347 */
-#define TFTP_MIN_DATA (8)
-#define TFTP_MAX_DATA (65464)
+#define TFTP_MIN_DATA   (8)
+#define TFTP_MAX_DATA   (65464)
 
 enum TFTP_PAK_TYPE
 {
@@ -51,11 +51,11 @@ enum TFTP_ERROR
 };
 
 /* RFC 1350 */
-#define TFTP_MODE_ASCII "netascii"
-#define TFTP_MODE_BIN "octet"
-#define TFTP_MODE_MAIL "mail"
+#define TFTP_MODE_ASCII     "netascii"
+#define TFTP_MODE_BIN       "octet"
+#define TFTP_MODE_MAIL      "mail"
 
 /* RFC 2348 */
-#define TFTP_OPT_BLKSIZE "blksize"
+#define TFTP_OPT_BLKSIZE    "blksize"
 
 #endif // TFTP_PROTOCOL_H_INCLUDED
