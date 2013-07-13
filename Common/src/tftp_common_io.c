@@ -57,24 +57,15 @@ sock_errno_e send_ack(SOCKET sock, unsigned blocknum)
 sock_errno_e receive_packet(SOCKET sock, char *buffer, unsigned *buffersize)
 {
     int iResult;
+    sock_errno_e retcode;
 
     iResult = recv(sock, buffer, *buffersize, 0);
 
     if (iResult == SOCKET_ERROR)
     {
         iResult = WSAGetLastError();
-        if (WSAETIMEDOUT == iResult)
-        {
-            return SOCK_ERR_TIMEOUT;
-        }
-        else if (WSAECONNRESET == iResult)
-        {
-            return SOCK_ERR_CLOSED;
-        }
-        else
-        {
-            SOCK_STD_ERR(SOCK_ERR_FAIL)
-        }
+        retcode = WSAError_to_sock_errno(iResult);
+        SOCK_STD_ERR(retcode)
     }
     if (iResult == 0)
     {
@@ -125,6 +116,7 @@ sock_errno_e receive_packet_un(SOCKET sock,
                                BOOL peekonly)
 {
     int iResult;
+    sock_errno_e retcode;
 
     if (peekonly) {
         iResult = recvfrom(sock, buffer, *buffersize, MSG_PEEK, addr, addrsize);
@@ -135,18 +127,8 @@ sock_errno_e receive_packet_un(SOCKET sock,
     if (iResult == SOCKET_ERROR)
     {
         iResult = WSAGetLastError();
-        if (WSAETIMEDOUT == iResult)
-        {
-            return SOCK_ERR_TIMEOUT;
-        }
-        else if (WSAECONNRESET == iResult)
-        {
-            return SOCK_ERR_CLOSED;
-        }
-        else
-        {
-            SOCK_STD_ERR(SOCK_ERR_FAIL)
-        }
+        retcode = WSAError_to_sock_errno(iResult);
+        SOCK_STD_ERR(retcode)
     }
     if (iResult == 0)
     {

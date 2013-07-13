@@ -65,4 +65,9 @@ void sock_done(void);
  */
 const char *sock_errno_to_string(sock_errno_e e);
 
+/*
+ * Converts WSA errors into sock_errno_e values
+ */
+ sock_errno_e WSAError_to_sock_errno(int WSAError);
+
 #endif // SOCK_UTILS_H_INCLUDED
