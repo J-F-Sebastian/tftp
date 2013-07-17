@@ -5,7 +5,6 @@
 
 #define SOCK_STD_ERR(errcode) \
 printf("%s failed: %d\n", __FUNCTION__, WSAGetLastError());\
-TRACE_FN_EXIT()\
 return errcode;
 
 typedef enum socket_errno

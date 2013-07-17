@@ -1,9 +1,5 @@
-#define DBG_MODULE_ON
-
 #include <stdio.h>
-#include <debug_traces.h>
 
-#include "version.h"
 #include "tftp_protocol.h"
 #include "tftp_server.h"
 
@@ -14,9 +10,7 @@ int main()
     int res_size;
     sock_errno_e retcode;
 
-    TRACE_FN_ENTRY()
-
-    printf(" *** TFTPServer %s %s\n", TFTPSERVER_STATUS, TFTPSERVER_FULLVERSION_STRING);
+    printf(" TFTPServer version 1.0\n");
 
     SetConsoleTitle("TFTP Server");
 
@@ -27,6 +21,8 @@ int main()
         return -1;
     }
 
+    printf(" socket init\t\tOK\n");
+
     retcode = sock_resolve_addr(&result, &res_size);
     if (SOCK_ERR_OK != retcode)
     {
@@ -34,6 +30,8 @@ int main()
         sock_done();
         return -2;
     }
+
+    printf(" address resolution\tOK\n");
 
     retcode = sock_server_setup(&result, res_size, &server_socket);
     if (SOCK_ERR_OK != retcode)
@@ -43,11 +41,14 @@ int main()
         return -3;
     }
 
+    printf(" setup complete\t\tOK\n");
+    printf("\n TFTPServer is running ...\n");
+
     retcode = tftp_server(server_socket);
 
     sock_done();
 
-    TRACE_FN_EXIT()
+    printf(" shutting down\t\tOK\n");
 
     return 0;
 }

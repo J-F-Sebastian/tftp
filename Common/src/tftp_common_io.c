@@ -1,24 +1,27 @@
-#define DBG_MODULE_ON
 #include <stdio.h>
-#include <debug_traces.h>
 
 #include "tftp_common_io.h"
 
 sock_errno_e send_error(SOCKET sock, enum TFTP_ERROR error)
 {
-    int iResult;
+    int iResult, msglen;
     short netbuf[MAX_ERROR_STRING_LEN/sizeof(short) + 3];
-
-    TRACE_FN_ENTRY()
 
     netbuf[0] = htons(TFTP_ERROR);
     netbuf[1] = htons(error);
 
-    snprintf((char *)(netbuf + 2), MAX_ERROR_STRING_LEN + 1, "%s", TFTP_ERRMSG[error]);
+    msglen = snprintf((char *)(netbuf + 2),
+                       MAX_ERROR_STRING_LEN + 1,
+                       "%s",
+                       TFTP_ERRMSG[error]);
+
+    if (msglen < 0) {
+        SOCK_STD_ERR(SOCK_ERR_FAIL)
+    }
 
     iResult = send(sock,
                    (char *)netbuf,
-                   4 + strlen(TFTP_ERRMSG[error]) + 1,
+                   4 + msglen + 1,
                    0);
 
     if (iResult == SOCKET_ERROR)
@@ -26,7 +29,6 @@ sock_errno_e send_error(SOCKET sock, enum TFTP_ERROR error)
         SOCK_STD_ERR(SOCK_ERR_FAIL)
     }
 
-    TRACE_FN_EXIT()
     return SOCK_ERR_OK;
 }
 
@@ -34,8 +36,6 @@ sock_errno_e send_ack(SOCKET sock, unsigned blocknum)
 {
     int iResult;
     short netbuf[2];
-
-    TRACE_FN_ENTRY()
 
     netbuf[0] = htons(TFTP_ACK);
     netbuf[1] = htons(blocknum);
@@ -50,7 +50,6 @@ sock_errno_e send_ack(SOCKET sock, unsigned blocknum)
        SOCK_STD_ERR(SOCK_ERR_FAIL)
     }
 
-    TRACE_FN_EXIT()
     return SOCK_ERR_OK;
 }
 

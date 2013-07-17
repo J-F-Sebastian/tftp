@@ -1,10 +1,6 @@
-#define DBG_MODULE_ON
 #include <w32api.h>
-
 #define WINVER WindowsXP
-
 #include <stdio.h>
-#include <debug_traces.h>
 
 #include "sock_utils.h"
 #include "tftp_protocol.h"
@@ -21,11 +17,6 @@ sock_errno_e sock_init()
         printf("WSAStartup failed: %d\n", iResult);
         return SOCK_ERR_FAIL;
     }
-
-    TRACE_BEGIN_MSG("Windows Sockets version %d.%d\n",wsaData.wHighVersion >> 8,
-                    wsaData.wHighVersion & 0x00FF)
-    TRACE_PRINT_MSG("System description: %s\n",wsaData.szDescription)
-    TRACE_END_MSG("System status: %s\n",wsaData.szSystemStatus)
 
     return SOCK_ERR_OK;
 }
@@ -44,7 +35,7 @@ sock_errno_e sock_resolve_addr(struct sockaddr *result, int *result_size)
     hints.ai_flags = AI_PASSIVE;
 
     // Resolve the host name
-    iResult = gethostname(hostname, 256);
+    iResult = gethostname(hostname, sizeof(hostname));
     if (iResult) {
         printf("gethostname failed: %d\n", iResult);
         return SOCK_ERR_FAIL;
@@ -109,18 +100,6 @@ sock_errno_e sock_client_setup(struct sockaddr *addr, int addr_size, SOCKET *soc
         closesocket(traffic_socket);
         return SOCK_ERR_FAIL;
     }
-
-#ifdef DBG_MODULE
-    unsigned retval;
-    int size = 4;
-
-    iResult = getsockopt(traffic_socket, SOL_SOCKET, SO_MAX_MSG_SIZE, (char *)&retval, &size);
-
-    if (!iResult) {
-        printf("Max message size is %u\n", retval);
-    }
-
-#endif
 
     *sock = traffic_socket;
 
