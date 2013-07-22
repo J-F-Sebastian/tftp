@@ -2,6 +2,7 @@
 
 #include "tftp_protocol.h"
 #include "tftp_server.h"
+#include "tftp_logger.h"
 
 int main()
 {
@@ -10,7 +11,7 @@ int main()
     int res_size;
     sock_errno_e retcode;
 
-    printf(" TFTPServer version 1.0\n");
+    tftp_log_message(" TFTPServer version 1.0\n");
 
     SetConsoleTitle("TFTP Server");
 
@@ -21,7 +22,7 @@ int main()
         return -1;
     }
 
-    printf(" socket init\t\tOK\n");
+    tftp_log_message(" socket init\t\tOK");
 
     retcode = sock_resolve_addr(&result, &res_size);
     if (SOCK_ERR_OK != retcode)
@@ -31,7 +32,7 @@ int main()
         return -2;
     }
 
-    printf(" address resolution\tOK\n");
+    tftp_log_message(" address resolution\tOK");
 
     retcode = sock_server_setup(&result, res_size, &server_socket);
     if (SOCK_ERR_OK != retcode)
@@ -41,14 +42,14 @@ int main()
         return -3;
     }
 
-    printf(" setup complete\t\tOK\n");
-    printf("\n TFTPServer is running ...\n");
+    tftp_log_message(" setup complete\t\tOK");
+    tftp_log_message("\n TFTPServer is running ...\n");
 
     retcode = tftp_server(server_socket);
 
     sock_done();
 
-    printf(" shutting down\t\tOK\n");
+    tftp_log_message(" shutting down\t\tOK\n");
 
     return 0;
 }
