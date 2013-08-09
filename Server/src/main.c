@@ -11,9 +11,10 @@ int main()
     int res_size;
     sock_errno_e retcode;
 
-    tftp_log_message(" TFTPServer version 1.0\n");
-
     SetConsoleTitle("TFTP Server");
+
+    tftp_log_init(TFTP_LOG_USR | TFTP_LOG_FILE | TFTP_LOG_TIMESTAMP);
+    tftp_log_message(" TFTPServer version 1.0\n");
 
     retcode = sock_init();
     if (SOCK_ERR_OK != retcode)
@@ -45,11 +46,12 @@ int main()
     tftp_log_message(" setup complete\t\tOK");
     tftp_log_message("\n TFTPServer is running ...\n");
 
-    retcode = tftp_server(server_socket);
+    //retcode = tftp_server(server_socket);
 
     sock_done();
 
     tftp_log_message(" shutting down\t\tOK\n");
+    tftp_log_done();
 
     return 0;
 }
