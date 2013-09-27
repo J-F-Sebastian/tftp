@@ -3,6 +3,7 @@
 
 #include "tftp_common_io.h"
 #include "tftp_server_io.h"
+#include "tftp_logger.h"
 
 sock_errno_e send_error_un(SOCKET sock,
                            struct sockaddr_in *addr,
@@ -11,6 +12,11 @@ sock_errno_e send_error_un(SOCKET sock,
 {
     int iResult;
     short netbuf[MAX_ERROR_STRING_LEN/sizeof(short) + 3];
+
+    tftp_log_message("Client %s %s (ERROR %d)",
+                     inet_ntoa(addr->sin_addr),
+                     TFTP_ERRMSG[error],
+                     error);
 
     netbuf[0] = htons(TFTP_ERROR);
     netbuf[1] = htons(error);

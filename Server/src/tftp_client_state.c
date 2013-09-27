@@ -9,6 +9,7 @@ void init_client_state(tftp_client_state_t *cli)
     cli->blockid = 0;
     cli->state_flags = TFTP_SRV_WAITING;
     cli->file = NULL;
+    memset(cli->filename, 0, sizeof(cli->filename));
     cli->block_buffer = NULL;
     cli->block_buffer_size = 0;
     cli->timeout_count = 0;
@@ -32,6 +33,7 @@ void reset_client_state(tftp_client_state_t *cli)
         fclose(cli->file);
         cli->file = NULL;
     }
+    memset(cli->filename, 0, sizeof(cli->filename));
     if (cli->block_buffer)
     {
         free(cli->block_buffer);

@@ -149,8 +149,15 @@ DWORD WINAPI start_client(LPVOID lpParam)
 
     if (state->state_flags & TFTP_SRV_SENDING)
     {
+        tftp_log_message("Sending %s to %s",
+                         state->filename,
+                         inet_ntoa(state->destination.sin_addr));
         handle_rrq(state);
     }
+
+    tftp_log_message("Completed %s (%u bytes)",
+                      state->filename,
+                      state->octets);
 
     reset_client_state(state);
     free(state);

@@ -45,7 +45,10 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
 {
     unsigned length = 0;
     char *cursor = netbuf + 2;
+    /* filename accepts relative path */
     char filename[TFTP_SRV_FILENAME_MAX + 1] = {0};
+    /* filename_start is the true file name */
+    char *filename_start = NULL;
     unsigned blocksize;
 
     strncpy(filename, TFTP_SRV_DEFAULT_ROOT,sizeof(TFTP_SRV_DEFAULT_ROOT) - 1);
@@ -75,6 +78,20 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
     {
         return -1;
     }
+
+    filename_start = strrchr(filename, '\\');
+    if (!filename_start) {
+        filename_start = strrchr(filename, '/');
+    }
+    /* If no slashes are found, then use the filename buffer */
+    if (!filename_start) {
+        filename_start = filename;
+    } else {
+        filename_start++;
+    }
+
+    memset(cli->filename, 0, sizeof(cli->filename));
+    strncpy(cli->filename, filename_start, sizeof(cli->filename) - 1);
 
     cursor++;
 
@@ -154,6 +171,7 @@ handle_read_request(SOCKET server,
 
     init_client_state(temp_state);
     temp_state->state_flags = TFTP_SRV_SENDING;
+    temp_state->destination = *client;
 
     retval = request_supported(netbuf, TRUE, temp_state);
 
