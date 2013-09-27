@@ -130,11 +130,11 @@ static void handle_rrq(tftp_client_state_t *cli)
         case TFTP_DATA:
             /* FALLTHRU */
         case TFTP_OACK:
-            printf("Unhandled packet type %d in %s\n", pak_type, __FUNCTION__);
+            tftp_log_message("Unhandled packet type %d in %s\n", pak_type, __FUNCTION__);
             break;
 
         default:
-            printf("Unknown packet type %d in %s\n", pak_type, __FUNCTION__);
+            tftp_log_message("Unknown packet type %d in %s\n", pak_type, __FUNCTION__);
             break;
         }
     }

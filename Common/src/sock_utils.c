@@ -4,6 +4,7 @@
 
 #include "sock_utils.h"
 #include "tftp_protocol.h"
+#include "tftp_logger.h"
 
 static const char *errnos[] = {"OK", "FAILURE", "TIMEOUT", "INVALID", "CLOSED"};
 
@@ -14,7 +15,7 @@ sock_errno_e sock_init()
     int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
 
     if (iResult) {
-        printf("WSAStartup failed: %d\n", iResult);
+        tftp_log_message("WSAStartup failed: %d\n", iResult);
         return SOCK_ERR_FAIL;
     }
 
@@ -37,14 +38,14 @@ sock_errno_e sock_resolve_addr(struct sockaddr *result, int *result_size)
     // Resolve the host name
     iResult = gethostname(hostname, sizeof(hostname));
     if (iResult) {
-        printf("gethostname failed: %d\n", iResult);
+        tftp_log_message("gethostname failed: %d\n", iResult);
         return SOCK_ERR_FAIL;
     }
 
     // Resolve the server address and port
     iResult = getaddrinfo(hostname, TFTP_PORT_NAME, &hints, &retval);
     if (iResult) {
-        printf("getaddrinfo failed: %d\n", iResult);
+        tftp_log_message("getaddrinfo failed: %d\n", iResult);
         return SOCK_ERR_FAIL;
     }
 
@@ -64,14 +65,14 @@ sock_errno_e sock_server_setup(struct sockaddr *addr, int addr_size, SOCKET *soc
     // Create a SOCKET to establish a server connection
     listen_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (listen_socket == INVALID_SOCKET) {
-        printf("socket failed: %d\n", WSAGetLastError());
+        tftp_log_message("socket failed: %d\n", WSAGetLastError());
         return SOCK_ERR_FAIL;
     }
 
     // Bind the socket to the addrinfo provided by the caller
     iResult = bind(listen_socket, addr, addr_size);
     if (iResult == SOCKET_ERROR) {
-        printf("bind failed: %d\n", WSAGetLastError());
+        tftp_log_message("bind failed: %d\n", WSAGetLastError());
         closesocket(listen_socket);
         return SOCK_ERR_FAIL;
     }
@@ -89,14 +90,14 @@ sock_errno_e sock_client_setup(struct sockaddr *addr, int addr_size, SOCKET *soc
     // Create a SOCKET to establish a server connection
     traffic_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (traffic_socket == INVALID_SOCKET) {
-        printf("socket failed: %d\n", WSAGetLastError());
+        tftp_log_message("socket failed: %d\n", WSAGetLastError());
         return SOCK_ERR_FAIL;
     }
 
     // Connect the socket to the addrinfo provided by the caller
     iResult = connect(traffic_socket, addr, addr_size);
     if (iResult == SOCKET_ERROR) {
-        printf("connect failed: %d\n", WSAGetLastError());
+        tftp_log_message("connect failed: %d\n", WSAGetLastError());
         closesocket(traffic_socket);
         return SOCK_ERR_FAIL;
     }
@@ -119,13 +120,13 @@ sock_errno_e sock_create(SOCKET *sock)
     // Create a SOCKET to establish a server connection
     traffic_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (traffic_socket == INVALID_SOCKET) {
-        printf("socket failed: %d\n", WSAGetLastError());
+        tftp_log_message("socket failed: %d\n", WSAGetLastError());
         return SOCK_ERR_FAIL;
     }
 
     iResult = bind(traffic_socket, (struct sockaddr *)&src, sizeof(src));
     if (iResult) {
-        printf("bind failed: %d\n", WSAGetLastError());
+        tftp_log_message("bind failed: %d\n", WSAGetLastError());
         return SOCK_ERR_FAIL;
     }
 
@@ -145,7 +146,7 @@ sock_errno_e sock_connect(SOCKET sock, struct sockaddr *addr, int addr_size)
      */
     iResult = connect(sock, addr, addr_size);
     if (iResult == SOCKET_ERROR) {
-        printf("reconnect failed: %d\n", WSAGetLastError());
+        tftp_log_message("reconnect failed: %d\n", WSAGetLastError());
         return SOCK_ERR_FAIL;
     }
 
@@ -160,7 +161,7 @@ sock_errno_e sock_set_timeout(SOCKET sock, unsigned msecs)
     // using UDP so we configure read (write?) timeouts
     iResult = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&msecs, sizeof(msecs));
     if (iResult == SOCKET_ERROR) {
-        printf("setsockopt failed: %d\n", WSAGetLastError());
+        tftp_log_message("setsockopt failed: %d\n", WSAGetLastError());
         return SOCK_ERR_FAIL;
     }
 

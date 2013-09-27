@@ -6,6 +6,7 @@
 #include "tftp_common_io.h"
 #include "tftp_server_io.h"
 #include "tftp_server_client.h"
+#include "tftp_logger.h"
 
 static HANDLE client_threads[TFTP_SRV_MAX_CLIENTS] = {NULL};
 
@@ -22,7 +23,7 @@ static inline HANDLE *get_client_thread()
             {
                 if (!CloseHandle(client_threads[i]))
                 {
-                    printf("CloseHandle failed: %lu\n", GetLastError());
+                    tftp_log_message("CloseHandle failed: %lu\n", GetLastError());
                 }
                 else
                 {
@@ -167,7 +168,7 @@ handle_read_request(SOCKET server,
             *newthread = CreateThread(NULL, 4096, start_client, temp_state, 0, NULL);
             if (!*newthread)
             {
-                printf("Createthread failed: %lu\n", GetLastError());
+                tftp_log_message("Createthread failed: %lu\n", GetLastError());
                 reset_client_state(temp_state);
                 free(temp_state);
             }
@@ -252,12 +253,12 @@ sock_errno_e tftp_server(SOCKET sock)
         case TFTP_ACK:
             /* FALLTHRU */
         case TFTP_ERROR:
-            printf("Unhandled packet type %d in %s\n", pak_type, __FUNCTION__);
+            tftp_log_message("Unhandled packet type %d in %s\n", pak_type, __FUNCTION__);
             send_error_un(sock, &client, client_size, TFTP_ERR_UNKNOWNID);
             break;
 
         default:
-            printf("Unknown packet type %d in %s\n", pak_type, __FUNCTION__);
+            tftp_log_message("Unknown packet type %d in %s\n", pak_type, __FUNCTION__);
             send_error_un(sock, &client, client_size, TFTP_ERR_UNDEF);
             break;
         }

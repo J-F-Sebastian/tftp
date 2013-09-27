@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "tftp_common_io.h"
+#include "tftp_logger.h"
 
 sock_errno_e send_error(SOCKET sock, enum TFTP_ERROR error)
 {
@@ -68,7 +69,7 @@ sock_errno_e receive_packet(SOCKET sock, char *buffer, unsigned *buffersize)
     }
     if (iResult == 0)
     {
-        printf("receive_packet ended session\n");
+        tftp_log_message("receive_packet ended session\n");
         return SOCK_ERR_CLOSED;
     }
 
@@ -85,16 +86,16 @@ sock_errno_e receive_error(char *buffer)
 
     if (error < TFTP_ERR_MAX)
     {
-        printf("ERROR %d: %s\n", error, TFTP_ERRMSG[error]);
+        tftp_log_message("ERROR %d: %s\n", error, TFTP_ERRMSG[error]);
     }
     else
     {
-        printf("UNKNOWN TFTP ERROR CODE %d\n", error);
+        tftp_log_message("UNKNOWN TFTP ERROR CODE %d\n", error);
     }
 
     strncpy(description, cursor, sizeof(description) - 1);
 
-    printf("Error description: %s\n", description);
+    tftp_log_message("Error description: %s\n", description);
 
     return SOCK_ERR_OK;
 }
@@ -131,7 +132,7 @@ sock_errno_e receive_packet_un(SOCKET sock,
     }
     if (iResult == 0)
     {
-        printf("%s ended session\n",__FUNCTION__);
+        tftp_log_message("%s ended session\n",__FUNCTION__);
         return SOCK_ERR_CLOSED;
     }
 

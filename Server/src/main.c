@@ -23,7 +23,7 @@ int main()
         return -1;
     }
 
-    tftp_log_message(" socket init\t\tOK");
+    tftp_log_message("socket init\t\tOK");
 
     retcode = sock_resolve_addr(&result, &res_size);
     if (SOCK_ERR_OK != retcode)
@@ -33,7 +33,7 @@ int main()
         return -2;
     }
 
-    tftp_log_message(" address resolution\tOK");
+    tftp_log_message("address resolution\tOK");
 
     retcode = sock_server_setup(&result, res_size, &server_socket);
     if (SOCK_ERR_OK != retcode)
@@ -43,14 +43,14 @@ int main()
         return -3;
     }
 
-    tftp_log_message(" setup complete\t\tOK");
-    tftp_log_message("\n TFTPServer is running ...\n");
+    tftp_log_message("setup complete\t\tOK");
+    tftp_log_message("TFTPServer is running ...\n");
 
-    //retcode = tftp_server(server_socket);
+    retcode = tftp_server(server_socket);
 
     sock_done();
 
-    tftp_log_message(" shutting down\t\tOK\n");
+    tftp_log_message("shutting down\t\tOK\n");
     tftp_log_done();
 
     return 0;

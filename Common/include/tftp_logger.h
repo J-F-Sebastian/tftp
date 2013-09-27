@@ -10,7 +10,7 @@ typedef enum tftp_log_config {
 void tftp_log_init(const unsigned flags);
 void tftp_log_done(void);
 
-void tftp_log_message(const char *message);
+void tftp_log_message(const char *format, ...);
 
 
 #endif // TFTP_LOGGER_H_INCLUDED

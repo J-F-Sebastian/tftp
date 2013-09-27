@@ -3,8 +3,10 @@
 
 #include <ws2tcpip.h>
 
+#include "tftp_logger.h"
+
 #define SOCK_STD_ERR(errcode) \
-printf("%s failed: %d\n", __FUNCTION__, WSAGetLastError());\
+tftp_log_message("%s failed: %d\n", __FUNCTION__, WSAGetLastError());\
 return errcode;
 
 typedef enum socket_errno
