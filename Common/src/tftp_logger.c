@@ -93,6 +93,7 @@ void tftp_log_message(const char *format, ...)
     }
     if (myflags & TFTP_LOG_FILE) {
         fprintf(logfile, "%s\n", mylogmessage);
-    }    va_end(args);
+    }
+    va_end(args);
 
 }

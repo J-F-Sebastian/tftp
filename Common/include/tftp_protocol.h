@@ -12,8 +12,7 @@
 #define TFTP_MIN_DATA   (8)
 #define TFTP_MAX_DATA   (65464)
 
-enum TFTP_PAK_TYPE
-{
+enum TFTP_PAK_TYPE {
     /* RFC 1350 */
     TFTP_RRQ    = 1,
     TFTP_WRQ    = 2,
@@ -24,8 +23,7 @@ enum TFTP_PAK_TYPE
     TFTP_OACK   = 6
 };
 
-enum TFTP_ERROR
-{
+enum TFTP_ERROR {
     /* RFC 1350 */
     /* Not defined, see error message (if any). */
     TFTP_ERR_UNDEF = 0,

@@ -12,9 +12,9 @@ sock_errno_e send_error(SOCKET sock, enum TFTP_ERROR error)
     netbuf[1] = htons(error);
 
     msglen = snprintf((char *)(netbuf + 2),
-                       MAX_ERROR_STRING_LEN + 1,
-                       "%s",
-                       TFTP_ERRMSG[error]);
+                      MAX_ERROR_STRING_LEN + 1,
+                      "%s",
+                      TFTP_ERRMSG[error]);
 
     if (msglen < 0) {
         SOCK_STD_ERR(SOCK_ERR_FAIL)
@@ -25,8 +25,7 @@ sock_errno_e send_error(SOCKET sock, enum TFTP_ERROR error)
                    4 + msglen + 1,
                    0);
 
-    if (iResult == SOCKET_ERROR)
-    {
+    if (iResult == SOCKET_ERROR) {
         SOCK_STD_ERR(SOCK_ERR_FAIL)
     }
 
@@ -41,14 +40,10 @@ sock_errno_e send_ack(SOCKET sock, unsigned blocknum)
     netbuf[0] = htons(TFTP_ACK);
     netbuf[1] = htons(blocknum);
 
-    iResult = send(sock,
-                   (char *)netbuf,
-                   4,
-                   0);
+    iResult = send(sock, (char *)netbuf, 4, 0);
 
-    if (iResult == SOCKET_ERROR)
-    {
-       SOCK_STD_ERR(SOCK_ERR_FAIL)
+    if (iResult == SOCKET_ERROR) {
+        SOCK_STD_ERR(SOCK_ERR_FAIL)
     }
 
     return SOCK_ERR_OK;
@@ -61,14 +56,12 @@ sock_errno_e receive_packet(SOCKET sock, char *buffer, unsigned *buffersize)
 
     iResult = recv(sock, buffer, *buffersize, 0);
 
-    if (iResult == SOCKET_ERROR)
-    {
+    if (iResult == SOCKET_ERROR) {
         iResult = WSAGetLastError();
         retcode = WSAError_to_sock_errno(iResult);
         SOCK_STD_ERR(retcode)
     }
-    if (iResult == 0)
-    {
+    if (iResult == 0) {
         tftp_log_message("receive_packet ended session\n");
         return SOCK_ERR_CLOSED;
     }
@@ -84,12 +77,9 @@ sock_errno_e receive_error(char *buffer)
     char *cursor = buffer + 4;
     char description[MAX_ERROR_STRING_LEN + 1] = {0};
 
-    if (error < TFTP_ERR_MAX)
-    {
+    if (error < TFTP_ERR_MAX) {
         tftp_log_message("ERROR %d: %s\n", error, TFTP_ERRMSG[error]);
-    }
-    else
-    {
+    } else {
         tftp_log_message("UNKNOWN TFTP ERROR CODE %d\n", error);
     }
 
@@ -117,21 +107,16 @@ sock_errno_e receive_packet_un(SOCKET sock,
 {
     int iResult;
     sock_errno_e retcode;
+    int flags = (peekonly) ? MSG_PEEK : 0;
 
-    if (peekonly) {
-        iResult = recvfrom(sock, buffer, *buffersize, MSG_PEEK, addr, addrsize);
-    } else {
-        iResult = recvfrom(sock, buffer, *buffersize, 0, addr, addrsize);
-    }
+    iResult = recvfrom(sock, buffer, *buffersize, flags, addr, addrsize);
 
-    if (iResult == SOCKET_ERROR)
-    {
+    if (iResult == SOCKET_ERROR) {
         iResult = WSAGetLastError();
         retcode = WSAError_to_sock_errno(iResult);
         SOCK_STD_ERR(retcode)
     }
-    if (iResult == 0)
-    {
+    if (iResult == 0) {
         tftp_log_message("%s ended session\n",__FUNCTION__);
         return SOCK_ERR_CLOSED;
     }

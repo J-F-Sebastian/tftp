@@ -7,8 +7,7 @@
 
 #include "tftp_server.h"
 
-enum TFTP_SRV_STATE
-{
+enum TFTP_SRV_STATE {
     TFTP_SRV_WAITING = (1 << 0),
     TFTP_SRV_SENDING = (1 << 1),
     TFTP_SRV_RCVING  = (1 << 2),
@@ -17,8 +16,7 @@ enum TFTP_SRV_STATE
     TFTP_SRV_BLKSIZE = (1 << 5)
 };
 
-typedef struct tftp_client_state
-{
+typedef struct tftp_client_state {
     /* Support for RFC 1350 functionalities */
     SOCKET client;
     uint16_t blockid;

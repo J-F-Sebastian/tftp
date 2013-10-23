@@ -14,26 +14,18 @@ static inline HANDLE *get_client_thread()
 {
     unsigned i;
 
-    for (i = 0; i < NELEMENTS(client_threads); i++)
-    {
+    for (i = 0; i < NELEMENTS(client_threads); i++) {
         /* Position is allocated, see if it is signaled, if it is the case clear and return */
-        if (NULL != client_threads[i])
-        {
-            if (WAIT_OBJECT_0 == WaitForSingleObject(client_threads[i], 0))
-            {
-                if (!CloseHandle(client_threads[i]))
-                {
+        if (NULL != client_threads[i]) {
+            if (WAIT_OBJECT_0 == WaitForSingleObject(client_threads[i], 0)) {
+                if (!CloseHandle(client_threads[i])) {
                     tftp_log_message("CloseHandle failed: %lu\n", GetLastError());
-                }
-                else
-                {
+                } else {
                     client_threads[i] = NULL;
                     return &client_threads[i];
                 }
             }
-        }
-        else
-        {
+        } else {
             return &client_threads[i];
         }
     }
@@ -61,21 +53,16 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
      * is performed here and the request is rejected if the filename
      * is too long (for us!).
      */
-    while (length < TFTP_SRV_FILENAME_MAX)
-    {
-        if (*cursor)
-        {
+    while (length < TFTP_SRV_FILENAME_MAX) {
+        if (*cursor) {
             filename[length] = *cursor++;
             ++length;
-        }
-        else
-        {
+        } else {
             break;
         }
     }
 
-    if (TFTP_SRV_FILENAME_MAX == length)
-    {
+    if (TFTP_SRV_FILENAME_MAX == length) {
         return -1;
     }
 
@@ -98,42 +85,37 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
     /* netascii and mail are not supported */
 
     if (!strncasecmp(cursor, TFTP_MODE_ASCII,sizeof(TFTP_MODE_ASCII)) ||
-            !strncasecmp(cursor, TFTP_MODE_MAIL,sizeof(TFTP_MODE_MAIL)))
-    {
+            !strncasecmp(cursor, TFTP_MODE_MAIL,sizeof(TFTP_MODE_MAIL))) {
         return -2;
     }
 
-    if (read_request)
-    {
+    if (read_request) {
         cli->file = fopen(filename,"rb+");
-    }
-    else
-    {
+    } else {
         cli->file = fopen(filename,"wb+");
     }
 
-    if (!cli->file)
-    {
+    if (!cli->file) {
         return -3;
     }
 
     /*
      * Advance cursor to the options, if any
      */
-     while (*cursor++) {}
+    while (*cursor++) {}
 
-     if (*cursor) {
+    if (*cursor) {
         if (!strncasecmp(cursor, TFTP_OPT_BLKSIZE, sizeof(TFTP_OPT_BLKSIZE))) {
             cursor += sizeof(TFTP_OPT_BLKSIZE);
             blocksize = atoi(cursor);
             if ((blocksize < TFTP_MIN_DATA) ||
-                (blocksize > TFTP_MAX_DATA)) {
-                    blocksize = TFTP_DEFAULT_DATA;
+                    (blocksize > TFTP_MAX_DATA)) {
+                blocksize = TFTP_DEFAULT_DATA;
             }
-                cli->opt_blocksize = blocksize;
-                cli->state_flags |= TFTP_SRV_BLKSIZE;
+            cli->opt_blocksize = blocksize;
+            cli->state_flags |= TFTP_SRV_BLKSIZE;
         }
-     }
+    }
 
     /*
      * Allocation use the max supported size, so the client thread does not need
@@ -156,15 +138,13 @@ handle_read_request(SOCKET server,
     HANDLE *newthread;
 
     newthread = get_client_thread();
-    if (!newthread)
-    {
+    if (!newthread) {
         send_error_un(server, client, client_size, TFTP_ERR_UNDEF);
         return;
     }
 
     temp_state = malloc(sizeof(*temp_state));
-    if (!temp_state)
-    {
+    if (!temp_state) {
         send_error_un(server, client, client_size, TFTP_ERR_UNDEF);
         return;
     }
@@ -175,17 +155,14 @@ handle_read_request(SOCKET server,
 
     retval = request_supported(netbuf, TRUE, temp_state);
 
-    switch (retval)
-    {
+    switch (retval) {
     case 0 :
         if (SOCK_ERR_OK == sock_client_setup((struct sockaddr *)client,
                                              client_size,
                                              &temp_state->client) &&
-                SOCK_ERR_OK == sock_set_timeout(temp_state->client, TFTP_SRV_TIMEOUT_MS))
-        {
+                SOCK_ERR_OK == sock_set_timeout(temp_state->client, TFTP_SRV_TIMEOUT_MS)) {
             *newthread = CreateThread(NULL, 4096, start_client, temp_state, 0, NULL);
-            if (!*newthread)
-            {
+            if (!*newthread) {
                 tftp_log_message("Createthread failed: %lu\n", GetLastError());
                 reset_client_state(temp_state);
                 free(temp_state);
@@ -239,8 +216,7 @@ sock_errno_e tftp_server(SOCKET sock)
     unsigned netbuf_size;
     sock_errno_e retcode;
 
-    while (TRUE)
-    {
+    while (TRUE) {
         netbuf_size = sizeof(netbuf);
 
         retcode = receive_packet_un(sock,
@@ -256,8 +232,7 @@ sock_errno_e tftp_server(SOCKET sock)
 
         pak_type = ntohs(netbuf_shorts[0]);
 
-        switch (pak_type)
-        {
+        switch (pak_type) {
         case TFTP_RRQ:
             handle_read_request(sock, &client, client_size, netbuf);
             break;

@@ -12,8 +12,7 @@ handle_timeout(tftp_client_state_t *state)
     state->state_flags |= TFTP_SRV_TIMEOUT;
     state->timeout_count += 1;
     /* We tried hard, but it is time to reset the session */
-    if (state->timeout_count > TFTP_SRV_RETRIES)
-    {
+    if (state->timeout_count > TFTP_SRV_RETRIES) {
         return FALSE;
     }
 
@@ -45,8 +44,7 @@ handle_data_transmit(tftp_client_state_t *state)
                                      state->opt_blocksize,
                                      state->file);
 
-    if (state->block_buffer_size < state->opt_blocksize)
-    {
+    if (state->block_buffer_size < state->opt_blocksize) {
         state->state_flags |= TFTP_SRV_LASTACK;
     }
 
@@ -57,8 +55,7 @@ handle_data_transmit(tftp_client_state_t *state)
      * If the previous data packet timeout and an ack was received in time, clear the timeout
      * condition and reset counter.
      */
-    if (state->state_flags & TFTP_SRV_TIMEOUT)
-    {
+    if (state->state_flags & TFTP_SRV_TIMEOUT) {
         state->state_flags &= ~TFTP_SRV_TIMEOUT;
         state->timeout_count = 0;
     }
@@ -78,21 +75,16 @@ static void handle_rrq(tftp_client_state_t *cli)
         handle_data_transmit(cli);
     }
 
-    while (1)
-    {
+    while (1) {
         retcode = receive_packet(cli->client, cli->block_buffer, &cli->block_buffer_size);
 
-        switch (retcode)
-        {
+        switch (retcode) {
         case SOCK_ERR_OK:
             break;
         case SOCK_ERR_TIMEOUT:
-            if (handle_timeout(cli))
-            {
+            if (handle_timeout(cli)) {
                 continue;
-            }
-            else
-            {
+            } else {
                 return;
             }
             break;
@@ -103,17 +95,12 @@ static void handle_rrq(tftp_client_state_t *cli)
 
         pak_type = ntohs(netbuf_shorts[0]);
 
-        switch (pak_type)
-        {
+        switch (pak_type) {
         case TFTP_ACK:
-            if (SOCK_ERR_OK == receive_ack(cli->block_buffer, cli->blockid))
-            {
-                if (cli->state_flags & TFTP_SRV_LASTACK)
-                {
+            if (SOCK_ERR_OK == receive_ack(cli->block_buffer, cli->blockid)) {
+                if (cli->state_flags & TFTP_SRV_LASTACK) {
                     return;
-                }
-                else
-                {
+                } else {
                     handle_data_transmit(cli);
                 }
             }
@@ -147,8 +134,7 @@ DWORD WINAPI start_client(LPVOID lpParam)
 {
     tftp_client_state_t *state = (tftp_client_state_t *)lpParam;
 
-    if (state->state_flags & TFTP_SRV_SENDING)
-    {
+    if (state->state_flags & TFTP_SRV_SENDING) {
         tftp_log_message("Sending %s to %s",
                          state->filename,
                          inet_ntoa(state->destination.sin_addr));
@@ -156,8 +142,8 @@ DWORD WINAPI start_client(LPVOID lpParam)
     }
 
     tftp_log_message("Completed %s (%u bytes)",
-                      state->filename,
-                      state->octets);
+                     state->filename,
+                     state->octets);
 
     reset_client_state(state);
     free(state);

@@ -9,8 +9,7 @@
 tftp_log_message("%s failed: %d\n", __FUNCTION__, WSAGetLastError());\
 return errcode;
 
-typedef enum socket_errno
-{
+typedef enum socket_errno {
     SOCK_ERR_OK         = 0,
     SOCK_ERR_FAIL       = -1,
     SOCK_ERR_TIMEOUT    = -2,
@@ -44,12 +43,12 @@ sock_errno_e sock_client_setup(struct sockaddr *addr, int addr_size, SOCKET *soc
 /*
  * Create an unconnected, unboud socket on UDP layer
  */
- sock_errno_e sock_create(SOCKET *sock);
+sock_errno_e sock_create(SOCKET *sock);
 
 /*
  * Call connect on the socket
  */
- sock_errno_e sock_connect(SOCKET sock, struct sockaddr *addr, int addr_size);
+sock_errno_e sock_connect(SOCKET sock, struct sockaddr *addr, int addr_size);
 
 /*
  * Configures timeout.
@@ -69,6 +68,6 @@ const char *sock_errno_to_string(sock_errno_e e);
 /*
  * Converts WSA errors into sock_errno_e values
  */
- sock_errno_e WSAError_to_sock_errno(int WSAError);
+sock_errno_e WSAError_to_sock_errno(int WSAError);
 
 #endif // SOCK_UTILS_H_INCLUDED

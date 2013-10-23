@@ -6,8 +6,7 @@
 
 #define MAX_ERROR_STRING_LEN (76)
 
-static const char *TFTP_ERRMSG[]=
-{
+static const char *TFTP_ERRMSG[]= {
     "Undefined error.",
     "File not found.",
     "Access violation.",

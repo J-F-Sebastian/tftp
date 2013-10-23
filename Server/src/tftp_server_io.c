@@ -30,8 +30,7 @@ sock_errno_e send_error_un(SOCKET sock,
                      (struct sockaddr *)addr,
                      addr_size);
 
-    if (iResult == SOCKET_ERROR)
-    {
+    if (iResult == SOCKET_ERROR) {
         SOCK_STD_ERR(SOCK_ERR_FAIL)
     }
 
@@ -52,8 +51,7 @@ sock_errno_e send_data(SOCKET sock,
 
     iResult = send(sock, buffer, buffersize, 0);
 
-    if (iResult == SOCKET_ERROR)
-    {
+    if (iResult == SOCKET_ERROR) {
         SOCK_STD_ERR(SOCK_ERR_FAIL)
     }
 
@@ -71,8 +69,7 @@ sock_errno_e send_oack(SOCKET sock,
 
     iResult = send(sock, buffer, buffersize, 0);
 
-    if (iResult == SOCKET_ERROR)
-    {
+    if (iResult == SOCKET_ERROR) {
         SOCK_STD_ERR(SOCK_ERR_FAIL)
     }
 
