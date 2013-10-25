@@ -112,6 +112,7 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
                     (blocksize > TFTP_MAX_DATA)) {
                 blocksize = TFTP_DEFAULT_DATA;
             }
+            tftp_log_message("Blocksize: %u\n",blocksize);
             cli->opt_blocksize = blocksize;
             cli->state_flags |= TFTP_SRV_BLKSIZE;
         }
@@ -123,6 +124,9 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
      */
     cli->block_buffer = malloc(cli->opt_blocksize + TFTP_HDR_SIZE);
     cli->block_buffer_size = cli->opt_blocksize + TFTP_HDR_SIZE;
+    if (!cli->block_buffer) {
+        return -2;
+    }
 
     return 0;
 }
