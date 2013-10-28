@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <types_common.h>
 
-#include "tftp_server.h"
+#include "tftp_common_values.h"
 
 enum TFTP_SRV_STATE {
     TFTP_SRV_WAITING = (1 << 0),
@@ -22,7 +22,7 @@ typedef struct tftp_client_state {
     uint16_t blockid;
     uint16_t state_flags;
     FILE *file;
-    char filename[TFTP_SRV_FILENAME_MAX + 1];
+    char filename[TFTP_FILENAME_MAX + 1];
     char *block_buffer;
     unsigned block_buffer_size;
     unsigned timeout_count;

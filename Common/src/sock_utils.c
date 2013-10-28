@@ -161,10 +161,29 @@ sock_errno_e sock_set_timeout(SOCKET sock, unsigned msecs)
     // using UDP so we configure read (write?) timeouts
     iResult = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&msecs, sizeof(msecs));
     if (iResult == SOCKET_ERROR) {
-        tftp_log_message("setsockopt failed: %d\n", WSAGetLastError());
+        tftp_log_message("setsockopt SO_RCVTIMEO failed: %d\n", WSAGetLastError());
         return SOCK_ERR_FAIL;
     }
 
+    return SOCK_ERR_OK;
+}
+
+sock_errno_e sock_set_buffers(SOCKET sock, unsigned bytes)
+{
+    int iResult;
+
+    // Since the code is dedicated to TFTP, it is assumed that the connection is
+    // using UDP so we configure read and write buffers
+    iResult = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&bytes, sizeof(bytes));
+    if (iResult == SOCKET_ERROR) {
+        tftp_log_message("setsockopt SO_RCVBUF failed: %d\n", WSAGetLastError());
+        return SOCK_ERR_FAIL;
+    }
+    iResult = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&bytes, sizeof(bytes));
+    if (iResult == SOCKET_ERROR) {
+        tftp_log_message("setsockopt SO_SNDBUF failed: %d\n", WSAGetLastError());
+        return SOCK_ERR_FAIL;
+    }
     return SOCK_ERR_OK;
 }
 

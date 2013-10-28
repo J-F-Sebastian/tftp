@@ -56,6 +56,11 @@ sock_errno_e sock_connect(SOCKET sock, struct sockaddr *addr, int addr_size);
 sock_errno_e sock_set_timeout(SOCKET sock, unsigned msecs);
 
 /*
+ * Configures send and receive buffers.
+ */
+sock_errno_e sock_set_buffers(SOCKET sock, unsigned bytes);
+
+/*
  * Deinit socket library. Release any memory retained by sock_init.
  */
 void sock_done(void);

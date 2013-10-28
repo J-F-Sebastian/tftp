@@ -5,14 +5,15 @@
 #include "tftp_server_io.h"
 #include "tftp_server_client.h"
 #include "tftp_protocol.h"
+#include "tftp_common_values.h"
 
 static BOOL
 handle_timeout(tftp_client_state_t *state)
 {
-    state->state_flags |= TFTP_SRV_TIMEOUT;
+    state->state_flags |= TFTP_TIMEOUT_MS;
     state->timeout_count += 1;
     /* We tried hard, but it is time to reset the session */
-    if (state->timeout_count > TFTP_SRV_RETRIES) {
+    if (state->timeout_count > TFTP_RETRIES) {
         return FALSE;
     }
 

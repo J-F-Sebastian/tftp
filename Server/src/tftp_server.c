@@ -38,7 +38,7 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
     unsigned length = 0;
     char *cursor = netbuf + 2;
     /* filename accepts relative path */
-    char filename[TFTP_SRV_FILENAME_MAX + 1] = {0};
+    char filename[TFTP_FILENAME_MAX + 1] = {0};
     /* filename_start is the true file name */
     char *filename_start = NULL;
     unsigned blocksize;
@@ -53,7 +53,7 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
      * is performed here and the request is rejected if the filename
      * is too long (for us!).
      */
-    while (length < TFTP_SRV_FILENAME_MAX) {
+    while (length < TFTP_FILENAME_MAX) {
         if (*cursor) {
             filename[length] = *cursor++;
             ++length;
@@ -62,7 +62,7 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
         }
     }
 
-    if (TFTP_SRV_FILENAME_MAX == length) {
+    if (TFTP_FILENAME_MAX == length) {
         return -1;
     }
 
@@ -164,16 +164,18 @@ handle_read_request(SOCKET server,
         if (SOCK_ERR_OK == sock_client_setup((struct sockaddr *)client,
                                              client_size,
                                              &temp_state->client) &&
-                SOCK_ERR_OK == sock_set_timeout(temp_state->client, TFTP_SRV_TIMEOUT_MS)) {
+                SOCK_ERR_OK == sock_set_timeout(temp_state->client,
+                                                TFTP_TIMEOUT_MS) &&
+                SOCK_ERR_OK == sock_set_buffers(temp_state->client,
+                                                temp_state->opt_blocksize + 64)) {
             *newthread = CreateThread(NULL, 4096, start_client, temp_state, 0, NULL);
-            if (!*newthread) {
-                tftp_log_message("Createthread failed: %lu\n", GetLastError());
-                reset_client_state(temp_state);
-                free(temp_state);
-            }
             /* Let the client thread run, and enforce a delay between requests acceptance */
-            Sleep(TFTP_SRV_TIMEOUT_MS);
-
+            Sleep(TFTP_TIMEOUT_MS);
+        }
+        if (!*newthread) {
+            tftp_log_message("%s failed: %lu\n", __FUNCTION__,GetLastError());
+            reset_client_state(temp_state);
+            free(temp_state);
         }
         break;
 
