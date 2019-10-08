@@ -10,7 +10,7 @@ sock_errno_e send_rrq(SOCKET sock,
                       struct sockaddr *addr,
                       int addrsize)
 {
-    char buffer[TFTP_DEFAULT_DATA] = {0};
+    char buffer[TFTP_DEFAULT_BLKSIZE] = {0};
     short *shortbuf = (short *)buffer;
     int len = 2;
     int iResult;

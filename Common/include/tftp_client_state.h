@@ -19,11 +19,11 @@ enum TFTP_SRV_STATE {
 typedef struct tftp_client_state {
     /* Support for RFC 1350 functionalities */
     SOCKET client;
+    FILE *file;
+    char *block_buffer;
+    char filename[TFTP_FILENAME_MAX + 1];
     uint16_t blockid;
     uint16_t state_flags;
-    FILE *file;
-    char filename[TFTP_FILENAME_MAX + 1];
-    char *block_buffer;
     unsigned block_buffer_size;
     unsigned timeout_count;
     struct sockaddr_in destination;

@@ -14,7 +14,7 @@ void init_client_state(tftp_client_state_t *cli)
     cli->block_buffer_size = 0;
     cli->timeout_count = 0;
     cli->octets = 0;
-    cli->opt_blocksize = TFTP_DEFAULT_DATA;
+    cli->opt_blocksize = TFTP_DEFAULT_BLKSIZE;
     memset(&cli->destination, 0, sizeof(cli->destination));
 }
 
@@ -39,6 +39,6 @@ void reset_client_state(tftp_client_state_t *cli)
     cli->block_buffer_size = 0;
     cli->timeout_count = 0;
     cli->octets = 0;
-    cli->opt_blocksize = TFTP_DEFAULT_DATA;
+    cli->opt_blocksize = TFTP_DEFAULT_BLKSIZE;
     memset(&cli->destination, 0, sizeof(cli->destination));
 }

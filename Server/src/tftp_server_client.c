@@ -1,5 +1,3 @@
-#include <windows.h>
-
 #include "tftp_server.h"
 #include "tftp_common_io.h"
 #include "tftp_server_io.h"
@@ -150,5 +148,4 @@ DWORD WINAPI start_client(LPVOID lpParam)
     free(state);
 
     ExitThread(0);
-    return 0;
 }

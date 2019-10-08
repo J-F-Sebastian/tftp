@@ -8,6 +8,9 @@
 #include "tftp_server_client.h"
 #include "tftp_logger.h"
 
+// For MSVC only
+#define strncasecmp _strnicmp
+
 static HANDLE client_threads[TFTP_SRV_MAX_CLIENTS] = {NULL};
 
 static inline HANDLE *get_client_thread()
@@ -43,7 +46,7 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
     char *filename_start = NULL;
     unsigned blocksize;
 
-    strncpy(filename, TFTP_SRV_DEFAULT_ROOT,sizeof(TFTP_SRV_DEFAULT_ROOT) - 1);
+    strncpy(filename, TFTP_SRV_DEFAULT_ROOT, sizeof(TFTP_SRV_DEFAULT_ROOT) - 1);
     length = sizeof(TFTP_SRV_DEFAULT_ROOT) - 1;
 
     /*
@@ -110,7 +113,7 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
             blocksize = atoi(cursor);
             if ((blocksize < TFTP_MIN_DATA) ||
                     (blocksize > TFTP_MAX_DATA)) {
-                blocksize = TFTP_DEFAULT_DATA;
+                blocksize = TFTP_DEFAULT_BLKSIZE;
             }
             tftp_log_message("Blocksize: %u\n",blocksize);
             cli->opt_blocksize = blocksize;
@@ -217,7 +220,7 @@ sock_errno_e tftp_server(SOCKET sock)
      * All RFCs state that the RRQ and WRQ messages cannot be greater than
      * 512 bytes.
      */
-    char netbuf[TFTP_DEFAULT_DATA + TFTP_HDR_SIZE]= {0};
+    char netbuf[TFTP_DEFAULT_BLKSIZE + TFTP_HDR_SIZE]= {0};
     short *netbuf_shorts = (short *)netbuf;
     unsigned netbuf_size;
     sock_errno_e retcode;

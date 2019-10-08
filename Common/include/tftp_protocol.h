@@ -6,7 +6,7 @@
 
 /* RFC 1350 */
 #define TFTP_HDR_SIZE   (4)
-#define TFTP_DEFAULT_DATA (512)
+#define TFTP_DEFAULT_BLKSIZE (512)
 
 /* RFC 2347 */
 #define TFTP_MIN_DATA   (8)

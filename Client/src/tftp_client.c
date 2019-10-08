@@ -5,6 +5,9 @@
 #include "tftp_common_io.h"
 #include "tftp_client_io.h"
 
+// For MSVC only
+#define strncasecmp _strnicmp
+
 static BOOL
 handle_rrq_timeout(tftp_client_state_t *state, const char *filename)
 {
@@ -101,7 +104,7 @@ handle_oack_receive(tftp_client_state_t *state)
     if (state->block_buffer_size) {
         if (!strncasecmp(state->block_buffer + 2, TFTP_OPT_BLKSIZE, sizeof(TFTP_OPT_BLKSIZE))) {
             if (atoi(state->block_buffer + 2 + sizeof(TFTP_OPT_BLKSIZE)) <= state->opt_blocksize) {
-                state->opt_blocksize = atoi(state->block_buffer + 2 + sizeof(TFTP_OPT_BLKSIZE));
+                state->opt_blocksize = (uint16_t)atoi(state->block_buffer + 2 + sizeof(TFTP_OPT_BLKSIZE));
                 state->block_buffer_size = state->opt_blocksize + TFTP_HDR_SIZE;
                 //printf("OACK blksize is %u\n",state->opt_blocksize);
                 send_ack(state->client, state->blockid);
@@ -215,7 +218,7 @@ static BOOL handle_rrq(tftp_client_state_t *cli, const char *filename)
                     send_error(cli->client, TFTP_ERR_DISKFULL);
                     return FALSE;
                 }
-                cli->opt_blocksize = TFTP_DEFAULT_DATA;
+                cli->opt_blocksize = TFTP_DEFAULT_BLKSIZE;
                 cli->block_buffer_size = cli->opt_blocksize + TFTP_HDR_SIZE;
                 send_ack(cli->client, cli->blockid);
                 return TRUE;

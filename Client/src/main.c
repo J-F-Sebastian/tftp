@@ -1,4 +1,3 @@
-#include <windows.h>
 #include <stdio.h>
 
 #include "tftp_client.h"
@@ -7,14 +6,17 @@
 #include "tftp_client_state.h"
 #include "tftp_logger.h"
 
+// For MSVC only
+#define strncasecmp _strnicmp
+
 static BOOL rrq = TRUE;
 static struct sockaddr_in server_address;
 static char filename[TFTP_CLNT_FILENAME_MAX + 1] = {0};
 static tftp_client_state_t client;
-static unsigned blocksize = TFTP_DEFAULT_DATA;
+static uint16_t blocksize = TFTP_DEFAULT_BLKSIZE;
 
 static void
-print_help()
+print_help(void)
 {
     printf("\n Syntax\n\n TFTPClient.exe <Command> <ip address> [options] <filename>\n");
     printf("\n Commands :\n GET\t\t Read a file from the server\n PUT\t\t Write a file to the server\n");
@@ -24,7 +26,7 @@ print_help()
 static BOOL
 process_cmdline(char *argv[])
 {
-    uint32_t ipaddress;
+    struct in_addr ipaddress;
     unsigned pos = 1;
 
     if (!strncasecmp(argv[pos],"GET",3)) {
@@ -37,15 +39,17 @@ process_cmdline(char *argv[])
 
     ++pos;
 
-    ipaddress = inet_addr(argv[pos]);
+    if (1 != inet_pton(AF_INET, argv[pos], &ipaddress)) {
+        return FALSE;
+    }
 
-    if (INADDR_NONE == ipaddress) {
+    if (INADDR_NONE == ipaddress.s_addr) {
         return FALSE;
     }
 
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(TFTP_PORT_NUM);
-    server_address.sin_addr.s_addr = ipaddress;
+    server_address.sin_addr.s_addr = ipaddress.s_addr;
 
     ++pos;
 

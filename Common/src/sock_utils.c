@@ -8,7 +8,7 @@
 
 static const char *errnos[] = {"OK", "FAILURE", "TIMEOUT", "INVALID", "CLOSED"};
 
-sock_errno_e sock_init()
+sock_errno_e sock_init(void)
 {
     WSADATA wsaData;
     // Initialize Winsock
@@ -187,7 +187,7 @@ sock_errno_e sock_set_buffers(SOCKET sock, unsigned bytes)
     return SOCK_ERR_OK;
 }
 
-void sock_done()
+void sock_done(void)
 {
     WSACleanup();
 }
