@@ -6,53 +6,56 @@
 
 static void on_server_exit(void)
 {
-    sock_done();
+        sock_done();
 
-    tftp_log_message("shutting down\t\tOK\n");
-    tftp_log_done();
+        tftp_log_message("shutting down\t\tOK\n");
+        tftp_log_done();
 }
 
 int main()
 {
-    SOCKET server_socket = INVALID_SOCKET;
-    struct sockaddr result;
-    int res_size;
-    sock_errno_e retcode;
+        SOCKET server_socket = INVALID_SOCKET;
+        struct sockaddr result;
+        int res_size;
+        sock_errno_e retcode;
 
-    SetConsoleTitle("TFTP Server");
-    atexit(on_server_exit);
+        SetConsoleTitle("TFTP Server");
+        atexit(on_server_exit);
 
-    tftp_log_init(TFTP_LOG_USR | TFTP_LOG_FILE | TFTP_LOG_TIMESTAMP);
-    tftp_log_message(" TFTPServer version 1.0\n");
+        tftp_log_init(TFTP_LOG_USR | TFTP_LOG_FILE | TFTP_LOG_TIMESTAMP);
+        tftp_log_message(" TFTPServer version 1.0\n");
 
-    retcode = sock_init();
-    if (SOCK_ERR_OK != retcode) {
-        printf("sock_init failed: %s\n", sock_errno_to_string(retcode));
-        return -1;
-    }
+        retcode = sock_init();
+        if (SOCK_ERR_OK != retcode)
+        {
+                printf("sock_init failed: %s\n", sock_errno_to_string(retcode));
+                return -1;
+        }
 
-    tftp_log_message("socket init\t\tOK");
+        tftp_log_message("socket init\t\tOK");
 
-    retcode = sock_resolve_addr(&result, &res_size);
-    if (SOCK_ERR_OK != retcode) {
-        printf("sock_resolve_addr failed: %s\n",sock_errno_to_string(retcode));
-        sock_done();
-        return -2;
-    }
+        retcode = sock_resolve_addr(&result, &res_size);
+        if (SOCK_ERR_OK != retcode)
+        {
+                printf("sock_resolve_addr failed: %s\n", sock_errno_to_string(retcode));
+                sock_done();
+                return -2;
+        }
 
-    tftp_log_message("address resolution\tOK");
+        tftp_log_message("address resolution\tOK");
 
-    retcode = sock_server_setup(&result, res_size, &server_socket);
-    if (SOCK_ERR_OK != retcode) {
-        printf("sock_setup failed: %s\n", sock_errno_to_string(retcode));
-        WSACleanup();
-        return -3;
-    }
+        retcode = sock_server_setup(&result, res_size, &server_socket);
+        if (SOCK_ERR_OK != retcode)
+        {
+                printf("sock_setup failed: %s\n", sock_errno_to_string(retcode));
+                WSACleanup();
+                return -3;
+        }
 
-    tftp_log_message("setup complete\t\tOK");
-    tftp_log_message("TFTPServer is running ...\n");
+        tftp_log_message("setup complete\t\tOK");
+        tftp_log_message("TFTPServer is running ...\n");
 
-    retcode = tftp_server(server_socket);
+        retcode = tftp_server(server_socket);
 
-    return 0;
+        return 0;
 }

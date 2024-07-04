@@ -21,7 +21,7 @@ typedef int BOOL;
 typedef int STATUS;
 
 #ifndef NELEMENTS
-#define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
+#define NELEMENTS(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
 #ifndef Kbit
@@ -29,15 +29,15 @@ typedef int STATUS;
 #endif
 
 #ifndef Mbit
-#define Mbit (1000*Kbit)
+#define Mbit (1000 * Kbit)
 #endif
 
 #ifndef Gbit
-#define Gbit (1000*Mbit)
+#define Gbit (1000 * Mbit)
 #endif
 
 #ifndef Tbit
-#define Tbit (1000*Tbit)
+#define Tbit (1000 * Tbit)
 #endif
 
 #ifndef KBYTE
@@ -45,11 +45,11 @@ typedef int STATUS;
 #endif
 
 #ifndef MBYTE
-#define MBYTE (1024*KBYTE)
+#define MBYTE (1024 * KBYTE)
 #endif
 
 #ifndef GBYTE
-#define GBYTE (1024*MBYTE)
+#define GBYTE (1024 * MBYTE)
 #endif
 
 /*
@@ -76,6 +76,5 @@ typedef int STATUS;
 #endif
 
 /*please add other error code here*/
-
 
 #endif

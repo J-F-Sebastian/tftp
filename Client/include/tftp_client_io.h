@@ -15,6 +15,6 @@ sock_errno_e send_rrq(SOCKET sock,
                       struct sockaddr *addr,
                       int addrsize);
 
-//sock_errno_e receive_data(char *buffer);
+// sock_errno_e receive_data(char *buffer);
 
 #endif // TFTP_CLIENT_IO_H_INCLUDED

@@ -10,9 +10,9 @@
  * address.
  */
 sock_errno_e send_error_un(SOCKET sock,
-                           struct sockaddr_in *addr,
-                           int addr_size,
-                           enum TFTP_ERROR error);
+			   struct sockaddr_in *addr,
+			   int addr_size,
+			   enum TFTP_ERROR error);
 /*
  * Send a data packet as defined by the TFTP protocol.
  * sock must be a bound socket, addr points to the destination
@@ -26,12 +26,12 @@ sock_errno_e send_error_un(SOCKET sock,
  * | 2 octets (type) | 2 octets (blockid) | ..... N octets (data) .....|
  */
 sock_errno_e send_data(SOCKET sock,
-                       char *buffer,
-                       unsigned buffersize,
-                       unsigned blocknum);
+		       char *buffer,
+		       unsigned buffersize,
+		       unsigned blocknum);
 
 sock_errno_e send_oack(SOCKET sock,
-                       char *buffer,
-                       unsigned buffersize);
+		       char *buffer,
+		       unsigned buffersize);
 
 #endif // TFTP_SERVER_IO_H_INCLUDED

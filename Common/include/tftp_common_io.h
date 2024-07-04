@@ -6,7 +6,7 @@
 
 #define MAX_ERROR_STRING_LEN (76)
 
-static const char *TFTP_ERRMSG[]= {
+static const char *TFTP_ERRMSG[] = {
     "Undefined error.",
     "File not found.",
     "Access violation.",
@@ -14,8 +14,7 @@ static const char *TFTP_ERRMSG[]= {
     "Illegal TFTP operation.",
     "Unknown transfer ID.",
     "File already exists.",
-    "No such user."
-};
+    "No such user."};
 
 /*
  * Send an error packet as defined by the TFTP protocol.

@@ -5,16 +5,17 @@
 
 #include "tftp_logger.h"
 
-#define SOCK_STD_ERR(errcode) \
-tftp_log_message("%s failed: %d\n", __FUNCTION__, WSAGetLastError());\
-return errcode;
+#define SOCK_STD_ERR(errcode)                                                 \
+        tftp_log_message("%s failed: %d\n", __FUNCTION__, WSAGetLastError()); \
+        return errcode;
 
-typedef enum socket_errno {
-    SOCK_ERR_OK         = 0,
-    SOCK_ERR_FAIL       = -1,
-    SOCK_ERR_TIMEOUT    = -2,
-    SOCK_ERR_INVAL      = -3,
-    SOCK_ERR_CLOSED     = -4
+typedef enum socket_errno
+{
+        SOCK_ERR_OK = 0,
+        SOCK_ERR_FAIL = -1,
+        SOCK_ERR_TIMEOUT = -2,
+        SOCK_ERR_INVAL = -3,
+        SOCK_ERR_CLOSED = -4
 } sock_errno_e;
 
 /*
