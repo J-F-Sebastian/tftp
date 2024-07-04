@@ -1,5 +1,3 @@
-#include <w32api.h>
-#define WINVER WindowsXP
 #include <stdio.h>
 
 #include "sock_utils.h"

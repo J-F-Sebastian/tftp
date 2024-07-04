@@ -84,8 +84,9 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
 
     /* netascii and mail are not supported */
 
-    if (!strncasecmp(cursor, TFTP_MODE_ASCII,sizeof(TFTP_MODE_ASCII)) ||
-            !strncasecmp(cursor, TFTP_MODE_MAIL,sizeof(TFTP_MODE_MAIL))) {
+    if (!_strnicmp(cursor, TFTP_MODE_ASCII, sizeof(TFTP_MODE_ASCII)) ||
+        !_strnicmp(cursor, TFTP_MODE_MAIL, sizeof(TFTP_MODE_MAIL)))
+    {
         return -2;
     }
 
@@ -104,15 +105,18 @@ static int request_supported(char *netbuf, BOOL read_request, tftp_client_state_
      */
     while (*cursor++) {}
 
-    if (*cursor) {
-        if (!strncasecmp(cursor, TFTP_OPT_BLKSIZE, sizeof(TFTP_OPT_BLKSIZE))) {
+    if (*cursor)
+    {
+        if (!_strnicmp(cursor, TFTP_OPT_BLKSIZE, sizeof(TFTP_OPT_BLKSIZE)))
+        {
             cursor += sizeof(TFTP_OPT_BLKSIZE);
             blocksize = atoi(cursor);
             if ((blocksize < TFTP_MIN_DATA) ||
-                    (blocksize > TFTP_MAX_DATA)) {
+                (blocksize > TFTP_MAX_DATA))
+            {
                 blocksize = TFTP_DEFAULT_DATA;
             }
-            tftp_log_message("Blocksize: %u\n",blocksize);
+            tftp_log_message("Blocksize: %u\n", blocksize);
             cli->opt_blocksize = blocksize;
             cli->state_flags |= TFTP_SRV_BLKSIZE;
         }

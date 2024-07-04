@@ -92,18 +92,22 @@ handle_data_receive(tftp_client_state_t *state)
 static BOOL
 handle_oack_receive(tftp_client_state_t *state)
 {
-    if (state->block_buffer_size < 2) {
+    if (state->block_buffer_size < 2)
+    {
         return FALSE;
     }
 
     state->block_buffer_size -= 2;
     /* FIXME error handling! */
-    if (state->block_buffer_size) {
-        if (!strncasecmp(state->block_buffer + 2, TFTP_OPT_BLKSIZE, sizeof(TFTP_OPT_BLKSIZE))) {
-            if (atoi(state->block_buffer + 2 + sizeof(TFTP_OPT_BLKSIZE)) <= state->opt_blocksize) {
+    if (state->block_buffer_size)
+    {
+        if (!_strnicmp(state->block_buffer + 2, TFTP_OPT_BLKSIZE, sizeof(TFTP_OPT_BLKSIZE)))
+        {
+            if (atoi(state->block_buffer + 2 + sizeof(TFTP_OPT_BLKSIZE)) <= state->opt_blocksize)
+            {
                 state->opt_blocksize = atoi(state->block_buffer + 2 + sizeof(TFTP_OPT_BLKSIZE));
                 state->block_buffer_size = state->opt_blocksize + TFTP_HDR_SIZE;
-                //printf("OACK blksize is %u\n",state->opt_blocksize);
+                // printf("OACK blksize is %u\n",state->opt_blocksize);
                 send_ack(state->client, state->blockid);
                 state->blockid++;
                 return TRUE;

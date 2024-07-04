@@ -1,5 +1,3 @@
-#include <windows.h>
-
 #include "tftp_server.h"
 #include "tftp_common_io.h"
 #include "tftp_server_io.h"

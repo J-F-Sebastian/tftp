@@ -1,4 +1,3 @@
-#include <windows.h>
 #include <stdio.h>
 
 #include "tftp_client.h"
@@ -27,11 +26,16 @@ process_cmdline(char *argv[])
     uint32_t ipaddress;
     unsigned pos = 1;
 
-    if (!strncasecmp(argv[pos],"GET",3)) {
+    if (!_strnicmp(argv[pos], "GET", 3))
+    {
         rrq = TRUE;
-    } else if (!strncasecmp(argv[pos],"PUT",3)) {
+    }
+    else if (!_strnicmp(argv[pos], "PUT", 3))
+    {
         rrq = FALSE;
-    } else {
+    }
+    else
+    {
         return FALSE;
     }
 
@@ -39,7 +43,8 @@ process_cmdline(char *argv[])
 
     ipaddress = inet_addr(argv[pos]);
 
-    if (INADDR_NONE == ipaddress) {
+    if (INADDR_NONE == ipaddress)
+    {
         return FALSE;
     }
 
@@ -49,13 +54,14 @@ process_cmdline(char *argv[])
 
     ++pos;
 
-    if (!strncasecmp(argv[pos],"blksize=",8)) {
+    if (!_strnicmp(argv[pos], "blksize=", 8))
+    {
         blocksize = atoi(argv[pos] + 8);
         printf("%s is %d\n", argv[pos], blocksize);
         ++pos;
     }
 
-    snprintf(filename, sizeof(filename),"%s",argv[pos]);
+    snprintf(filename, sizeof(filename), "%s", argv[pos]);
 
     return TRUE;
 }
@@ -79,17 +85,20 @@ int main(int argc, char *argv[])
     printf(" TFTPClient version 1.0\n");
 
     retcode = sock_init();
-    if (SOCK_ERR_OK != retcode) {
+    if (SOCK_ERR_OK != retcode)
+    {
         printf("sock_init failed: %s\n", sock_errno_to_string(retcode));
         return -1;
     }
 
-    if (argc < 4) {
+    if (argc < 4)
+    {
         print_help();
         return 0;
     }
 
-    if (!process_cmdline(argv)) {
+    if (!process_cmdline(argv))
+    {
         print_help();
         return -1;
     }
@@ -101,17 +110,21 @@ int main(int argc, char *argv[])
 
     init_client_state(&client);
 
-    if (rrq) {
+    if (rrq)
+    {
         client.state_flags = TFTP_SRV_RCVING;
-    } else {
+    }
+    else
+    {
         client.state_flags = TFTP_SRV_SENDING;
     }
 
     client.destination = server_address;
-    client.opt_blocksize = blocksize;
+    client.opt_blocksize = (uint16_t)blocksize;
 
     retcode = sock_create(&client.client);
-    if (SOCK_ERR_OK != retcode) {
+    if (SOCK_ERR_OK != retcode)
+    {
         printf("sock_setup failed: %s\n", sock_errno_to_string(retcode));
         sock_done();
         return -2;
@@ -123,12 +136,13 @@ int main(int argc, char *argv[])
 
     tend = GetTickCount() - tstart;
 
-    if (!tend) {
+    if (!tend)
+    {
         tend = 1;
     }
 
     printf("Transferred %u bytes in %u.%u seconds [%u KByte/s]\n",
-           client.octets, tend/1000, tend%1000, ((client.octets/tend)*1000)/1024);
+           client.octets, tend / 1000, tend % 1000, ((client.octets / tend) * 1000) / 1024);
 
     reset_client_state(&client);
 
