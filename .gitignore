@@ -1,0 +1,18 @@
+#ignore generated binaries
+commonobj/*
+clientobj/*
+serverobj/*
+commondbg/*
+clientdbg/*
+serverdbg/*
+doxygen/*
+*.exe
+*.dll
+*.pdb
+*.ilk
+#ignore commodities like fonts and SDKs
+*.ttf
+.vscode/*
+.vs/*
+Cpp/x64/*
+Cpp/.vs/*
