@@ -31,20 +31,22 @@
 #define TFTP_WINSIZE (1)
 
 /* RFC 2348 */
-#define TFTP_MIN_BLKSIZE (8)
-#define TFTP_MAX_BLKSIZE (65454)
+/* Value is adjustable in OACK response */
+#define TFTP_MIN_BLKSIZE (1)
+#define TFTP_MAX_BLKSIZE (65464)
 
 /* RFC 2349 */
 #define TFTP_MIN_TIMEOUT (1)
 #define TFTP_MAX_TIMEOUT (255)
 #define TFTP_MIN_TSIZE (1)
-#define TFTP_MAX_TSIZE (2 * 1024 * 1024 * 1024UL)
+#define TFTP_MAX_TSIZE (2 * 1024 * 1024 * 1024UL - 1)
 
 /* RFC 7440 */
+/* Value is adjustable in OACK response */
 #define TFTP_MIN_WINSIZE (1)
-#define TFTP_MAX_WINSIZE (65534)
+#define TFTP_MAX_WINSIZE (65535)
 
-enum TFTP_PACKET_TYPE
+enum class TFTP_PACKET_TYPE
 {
 	/* RFC 1350 */
 	TFTP_RRQ = 1,
@@ -56,7 +58,7 @@ enum TFTP_PACKET_TYPE
 	TFTP_OACK = 6
 };
 
-enum TFTP_ERRORS
+enum class TFTP_ERRORS
 {
 	/* RFC 1350 */
 	/* Not defined, see error message (if any). */
@@ -88,6 +90,7 @@ enum TFTP_ERRORS
 #define TFTP_MODE_MAIL "mail"
 
 /* RFC 2348 */
+/* Value is adjustable in OACK response */
 #define TFTP_OPT_BLKSIZE "blksize"
 
 /* RFC 2349 */
@@ -95,6 +98,7 @@ enum TFTP_ERRORS
 #define TFTP_OPT_TSIZE "tsize"
 
 /* RFC 7440 */
+/* Value is adjustable in OACK response */
 #define TFTP_OPT_WINSIZE "windowsize"
 
 #endif // TFTP_PROTOCOL_H_INCLUDED
