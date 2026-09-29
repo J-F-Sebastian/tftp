@@ -85,6 +85,7 @@ unsigned TFTPAppClient::createRequest(TFTPPacket &pkt)
 void TFTPAppClient::parseOptions(TFTPPacketParser &parsed, unsigned &options)
 {
 	std::map<std::string, std::string>::iterator opt;
+
 	try
 	{
 		if (options & (1 << APP_OPT_BLKSIZE))
@@ -141,6 +142,40 @@ void TFTPAppClient::parseOptions(TFTPPacketParser &parsed, unsigned &options)
 		}
 	}
 	catch (const std::exception &e)
+	{
+		std::cerr << "EXCEPTION in " << __func__ << ", line " << __LINE__ << " : " << e.what() << std::endl;
+		throw;
+	}
+}
+
+void TFTPAppClient::validateOptions(unsigned& options)
+{
+	try
+	{
+		if (options & ((1 << APP_OPT_BLKSIZE) | (1 << APP_OPT_WINSIZE)))
+		{
+			if (blockSize * windowSize > UDPBUFSIZE)
+			{
+				// keep blockSize, change windowSize
+				while ((windowSize > TFTP_MIN_WINSIZE) && (blockSize * windowSize > UDPBUFSIZE))
+				{
+					windowSize /= 2;
+				}
+			}
+			if (blockSize * windowSize > UDPBUFSIZE)
+			{
+				// change blockSize
+				while ((blockSize > TFTP_MIN_BLKSIZE) && (blockSize * windowSize > UDPBUFSIZE))
+				{
+					blockSize /= 2;
+				}
+			}
+			// IMPOSSIBLE !!!
+			if (blockSize * windowSize > UDPBUFSIZE)
+				throw(std::out_of_range("transfer size exceeds internal buffer size."));
+		}
+	}
+	catch (const std::exception& e)
 	{
 		std::cerr << "EXCEPTION in " << __func__ << ", line " << __LINE__ << " : " << e.what() << std::endl;
 		throw;
@@ -238,12 +273,12 @@ bool TFTPAppClient::run()
 	unsigned retries = 0;
 	while (retries++ < 3)
 	{
-		sendto(tftpSocket,
-		       pkt.getBuffer(),
-		       (int)pkt.getBufferTail(),
-		       0,
-		       reinterpret_cast<const SOCKADDR *>(&srvAddress),
-		       sizeof(srvAddress));
+		::sendto(tftpSocket,
+		         pkt.getBuffer(),
+		         (int)pkt.getTailSize(),
+		         0,
+		         reinterpret_cast<const SOCKADDR *>(&srvAddress),
+		         sizeof(srvAddress));
 
 		retcode = recvfrom(tftpSocket,
 				   answer.getBuffer(),
@@ -274,9 +309,9 @@ bool TFTPAppClient::run()
 	pkt.resetBuffer(true);
 	answer.setBufferTail((unsigned)retcode);
 	TFTPPacketParser parsed(answer);
-	if (parsed.type == TFTP_ERROR)
+	if (parsed.type == TFTP_PACKET_TYPE::TFTP_ERROR)
 	{
-		std::cout << "Server sent error " << parsed.error << " : " << parsed.errorMsg << std::endl;
+		std::cout << "Server sent error " << (int)parsed.error << " : " << parsed.errorMsg << std::endl;
 		return false;
 	}
 	/*
@@ -291,21 +326,22 @@ bool TFTPAppClient::run()
 	 * Server answered with an acknowledge for options. We need to parse the message,
 	 * validate options, eventually answer with an error and quit - or proceed with the transfer.
 	 */
-	if (parsed.type == TFTP_OACK)
+	if (parsed.type == TFTP_PACKET_TYPE::TFTP_OACK)
 	{
 		if (!options)
 		{
-			sendError(TFTP_ERR_OPTION);
+			sendError(TFTP_ERRORS::TFTP_ERR_OPTION);
 			return false;
 		}
 		try
 		{
 			parseOptions(parsed, options);
+			validateOptions(options);
 		}
 		catch (std::exception &e)
 		{
 			std::cerr << "EXCEPTION in " << __func__ << ", line " << __LINE__ << " : " << e.what() << std::endl;
-			sendError(TFTP_ERR_OPTION);
+			sendError(TFTP_ERRORS::TFTP_ERR_OPTION);
 			return false;
 		}
 		if (readRequest)
@@ -314,8 +350,8 @@ bool TFTPAppClient::run()
 			send(tftpSocket, pkt.getBuffer(), (int)pkt.getBufferSize(), 0);
 		}
 	}
-	else if (((parsed.type == TFTP_DATA) && readRequest) ||
-		 ((parsed.type == TFTP_ACK) && !readRequest))
+	else if (((parsed.type == TFTP_PACKET_TYPE::TFTP_DATA) && readRequest) ||
+		 ((parsed.type == TFTP_PACKET_TYPE::TFTP_ACK) && !readRequest))
 	{
 		setBlockSize(TFTP_BLKSIZE);
 		setWindowSize(TFTP_WINSIZE);
@@ -327,7 +363,7 @@ bool TFTPAppClient::run()
 	}
 	else
 	{
-		sendError(TFTP_ERR_ILLEGAL);
+		sendError(TFTP_ERRORS::TFTP_ERR_ILLEGAL);
 		return false;
 	}
 
@@ -403,15 +439,15 @@ bool TFTPAppClient::run()
 			 * Oversized DATA packets are invalid and will stop the transfer.
 			 * ERROR will stop the transfer.
 			 */
-			if (parsedAnswer.type == TFTP_ERROR)
+			if (parsedAnswer.type == TFTP_PACKET_TYPE::TFTP_ERROR)
 			{
-				std::cout << "Server sent error " << parsedAnswer.error << " : " << parsedAnswer.errorMsg << std::endl;
+				std::cout << "Server sent error " << (int)parsedAnswer.error << " : " << parsedAnswer.errorMsg << std::endl;
 				return false;
 			}
-			if ((parsedAnswer.type != TFTP_DATA) || (parsedAnswer.blockLen > blockSize))
+			if ((parsedAnswer.type != TFTP_PACKET_TYPE::TFTP_DATA) || (parsedAnswer.blockLen > blockSize))
 			{
-				std::cout << "Server sent an invalid packet type " << parsedAnswer.type << std::endl;
-				sendError(TFTP_ERR_ILLEGAL);
+				std::cout << "Server sent an invalid packet type " << (int)parsedAnswer.type << std::endl;
+				sendError(TFTP_ERRORS::TFTP_ERR_ILLEGAL);
 				return false;
 			}
 			/*
@@ -423,7 +459,7 @@ bool TFTPAppClient::run()
 			if ((parsedAnswer.blockNum != dataBlockNum - 1) && (parsedAnswer.blockNum != dataBlockNum))
 			{
 				std::cout << "Server sent an out of sequence BlockID, expected " << dataBlockNum << " received " << parsedAnswer.blockNum << std::endl;
-				sendError(TFTP_ERR_ILLEGAL);
+				sendError(TFTP_ERRORS::TFTP_ERR_ILLEGAL);
 				return false;
 			}
 			if (parsedAnswer.blockNum == dataBlockNum - 1)
@@ -479,16 +515,16 @@ bool TFTPAppClient::run()
 		}
 		std::cout << std::endl;
 
-		while (1)
+		while (true)
 		{
 			pkt.resetBuffer();
 			retries = 3;
 			TFTPPacketFactory::inst().createDATA(pkt, ++dataBlockNum, blockSize);
-			diskFile.read(pkt.getBufferAtTail(), blockSize);
-			pkt.incBufferTail(diskFile.gcount());
+			diskFile.read(pkt.getTail(), blockSize);
+			pkt.incBufferTail((unsigned)diskFile.gcount());
 			while (retries--)
 			{
-				send(tftpSocket, pkt.getBuffer(), (int)pkt.getBufferTail(), 0);
+				send(tftpSocket, pkt.getBuffer(), (int)pkt.getTailSize(), 0);
 				retcode = recv(tftpSocket, answer.getBuffer(), (int)answer.getBufferSize(), 0);
 				if (retcode == SOCKET_ERROR)
 				{
@@ -512,15 +548,15 @@ bool TFTPAppClient::run()
 			 * WRQ receives ACK or ERROR packets and sends DATA.
 			 * ERROR will stop the transfer.
 			 */
-			if (parsedAnswer.type == TFTP_ERROR)
+			if (parsedAnswer.type == TFTP_PACKET_TYPE::TFTP_ERROR)
 			{
-				std::cout << "Server sent error " << parsedAnswer.error << " : " << parsedAnswer.errorMsg << std::endl;
+				std::cout << "Server sent error " << (int)parsedAnswer.error << " : " << parsedAnswer.errorMsg << std::endl;
 				return false;
 			}
-			if (parsedAnswer.type != TFTP_ACK)
+			if (parsedAnswer.type != TFTP_PACKET_TYPE::TFTP_ACK)
 			{
-				std::cout << "Server sent an invalid packet type " << parsedAnswer.type << std::endl;
-				sendError(TFTP_ERR_ILLEGAL);
+				std::cout << "Server sent an invalid packet type " << (int)parsedAnswer.type << std::endl;
+				sendError(TFTP_ERRORS::TFTP_ERR_ILLEGAL);
 				return false;
 			}
 			/*
@@ -530,7 +566,7 @@ bool TFTPAppClient::run()
 			if (parsedAnswer.blockNum != dataBlockNum)
 			{
 				std::cout << "Server sent an out of sequence BlockID" << std::endl;
-				sendError(TFTP_ERR_ILLEGAL);
+				sendError(TFTP_ERRORS::TFTP_ERR_ILLEGAL);
 				return false;
 			}
 

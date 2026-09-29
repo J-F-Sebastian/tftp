@@ -46,6 +46,13 @@ class TFTPAppClient : public TFTPAppCommon
 	void parseOptions(TFTPPacketParser &parsed, unsigned &options);
 
 	/*
+	 * Validate the received options: prune unsupported options,
+	 * adjust variable options.
+	 * Invalid options or invalid values throws exceptions.
+	 */
+	void validateOptions(unsigned& options);
+
+	/*
 	 * Run the client in read mode, session started with a RRQ packet to the remote host.
 	 * This method is dedicated to implement the receive loop inside run().
 	 * Throws exceptions.
