@@ -38,7 +38,7 @@ public:
 	bool createRRQ(TFTPPacket &pkt, std::string &filename);
 	bool createDATA(TFTPPacket &pkt, uint16_t blockNum, unsigned dataSize, const char *data = 0);
 	bool createACK(TFTPPacket &pkt, uint16_t blockNum);
-	bool createERROR(TFTPPacket &pkt, enum TFTP_ERRORS error);
+	bool createERROR(TFTPPacket &pkt, enum class TFTP_ERRORS error);
 	bool createOACK(TFTPPacket &pkt);
 
 	bool addOption(TFTPPacket &pkt, const std::string &option, const std::string &value);
@@ -50,8 +50,8 @@ public:
 	explicit TFTPPacketParser(TFTPPacket &pkt);
 	~TFTPPacketParser();
 
-	enum TFTP_PACKET_TYPE type;
-	enum TFTP_ERRORS error;
+	enum class TFTP_PACKET_TYPE type;
+	enum class TFTP_ERRORS error;
 	uint16_t blockNum;
 	size_t blockLen;
 	const char *data;

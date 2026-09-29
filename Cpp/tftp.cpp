@@ -48,7 +48,7 @@ TFTPPacketFactory &TFTPPacketFactory::inst()
 
 bool TFTPPacketFactory::createWRQ(TFTPPacket &pkt, std::string &filename)
 {
-	return (pkt.addShort(htons(TFTP_WRQ)) &&
+	return (pkt.addShort(htons((u_short)TFTP_PACKET_TYPE::TFTP_WRQ)) &&
 		pkt.addBuffer(filename.c_str(), filename.size()) &&
 		pkt.addOctet('\0') &&
 		pkt.addBuffer(TFTP_MODE_BIN, sizeof(TFTP_MODE_BIN)))
@@ -58,7 +58,7 @@ bool TFTPPacketFactory::createWRQ(TFTPPacket &pkt, std::string &filename)
 
 bool TFTPPacketFactory::createRRQ(TFTPPacket &pkt, std::string &filename)
 {
-	return (pkt.addShort(htons(TFTP_RRQ)) &&
+	return (pkt.addShort(htons((u_short)TFTP_PACKET_TYPE::TFTP_RRQ)) &&
 		pkt.addBuffer(filename.c_str(), filename.size()) &&
 		pkt.addOctet('\0') &&
 		pkt.addBuffer(TFTP_MODE_BIN, sizeof(TFTP_MODE_BIN)))
@@ -68,7 +68,7 @@ bool TFTPPacketFactory::createRRQ(TFTPPacket &pkt, std::string &filename)
 
 bool TFTPPacketFactory::createDATA(TFTPPacket &pkt, uint16_t blockNum, unsigned dataSize, const char *data)
 {
-	return (pkt.addShort(htons(TFTP_DATA)) &&
+	return (pkt.addShort(htons((u_short)TFTP_PACKET_TYPE::TFTP_DATA)) &&
 		pkt.addShort(htons(blockNum)) &&
 		pkt.addBuffer(data, dataSize))
 		   ? true
@@ -77,17 +77,17 @@ bool TFTPPacketFactory::createDATA(TFTPPacket &pkt, uint16_t blockNum, unsigned 
 
 bool TFTPPacketFactory::createACK(TFTPPacket &pkt, uint16_t blockNum)
 {
-	return (pkt.addShort(htons(TFTP_ACK)) &&
+	return (pkt.addShort(htons((u_short)TFTP_PACKET_TYPE::TFTP_ACK)) &&
 		pkt.addShort(htons(blockNum)))
 		   ? true
 		   : false;
 }
 
-bool TFTPPacketFactory::createERROR(TFTPPacket &pkt, enum TFTP_ERRORS error)
+bool TFTPPacketFactory::createERROR(TFTPPacket &pkt, enum class TFTP_ERRORS error)
 {
-	return (pkt.addShort(htons(TFTP_ERROR)) &&
+	return (pkt.addShort(htons((u_short)TFTP_PACKET_TYPE::TFTP_ERROR)) &&
 		pkt.addShort((uint16_t)error) &&
-		pkt.addBuffer(TFTP_ERRMSG[error].c_str(), TFTP_ERRMSG[error].length()) &&
+		pkt.addBuffer(TFTP_ERRMSG[(int)error].c_str(), TFTP_ERRMSG[(int)error].length()) &&
 		pkt.addOctet('\0'))
 		   ? true
 		   : false;
@@ -96,7 +96,7 @@ bool TFTPPacketFactory::createERROR(TFTPPacket &pkt, enum TFTP_ERRORS error)
 bool TFTPPacketFactory::createOACK(TFTPPacket &pkt)
 {
 	// TBD
-	return (pkt.addShort(htons(TFTP_OACK)))
+	return (pkt.addShort(htons((u_short)TFTP_PACKET_TYPE::TFTP_OACK)))
 		   ? true
 		   : false;
 }
@@ -110,11 +110,11 @@ bool TFTPPacketFactory::addOption(TFTPPacket &pkt, const std::string &option, co
 
 	switch (ntohs(pkt.getShort(0)))
 	{
-	case TFTP_WRQ:
+	case (int)TFTP_PACKET_TYPE::TFTP_WRQ:
 	/* FALLTHRU */
-	case TFTP_RRQ:
+	case (int)TFTP_PACKET_TYPE::TFTP_RRQ:
 	/* FALLTHRU */
-	case TFTP_OACK:
+	case (int)TFTP_PACKET_TYPE::TFTP_OACK:
 	{
 		return (pkt.addBuffer(option.c_str(), option.length()) &&
 			pkt.addOctet('\0') &&
@@ -133,17 +133,17 @@ bool TFTPPacketFactory::addOption(TFTPPacket &pkt, const std::string &option, co
  ********************************************************************/
 TFTPPacketParser::TFTPPacketParser(TFTPPacket &pckt)
 {
-	unsigned pktlen = pckt.getBufferTail();
-	unsigned bufpos = 0;
+	size_t pktlen = pckt.getTailSize();
+	size_t bufpos = 0;
 
 	if (!pckt.getBuffer() || !pktlen)
 		throw std::invalid_argument("NULL packet");
 
-	type = static_cast<enum TFTP_PACKET_TYPE>(ntohs(pckt.getShort(0)));
-	if ((type < TFTP_RRQ) || (type > TFTP_OACK))
+	type = static_cast<enum class TFTP_PACKET_TYPE>(ntohs(pckt.getShort(0)));
+	if ((type < TFTP_PACKET_TYPE::TFTP_RRQ) || (type > TFTP_PACKET_TYPE::TFTP_OACK))
 		throw std::range_error("unknown packet");
 
-	if ((type == TFTP_DATA) || (type == TFTP_ACK))
+	if ((type == TFTP_PACKET_TYPE::TFTP_DATA) || (type == TFTP_PACKET_TYPE::TFTP_ACK))
 	{
 		blockNum = ntohs(pckt.getShort(1));
 	}
@@ -152,7 +152,7 @@ TFTPPacketParser::TFTPPacketParser(TFTPPacket &pckt)
 		blockNum = 0;
 	}
 
-	if (type == TFTP_DATA)
+	if (type == TFTP_PACKET_TYPE::TFTP_DATA)
 	{
 		data = pckt.getBuffer() + 4;
 		blockLen = pktlen - 4;
@@ -163,18 +163,18 @@ TFTPPacketParser::TFTPPacketParser(TFTPPacket &pckt)
 		blockLen = 0;
 	}
 
-	if (type == TFTP_ERROR)
+	if (type == TFTP_PACKET_TYPE::TFTP_ERROR)
 	{
-		error = static_cast<enum TFTP_ERRORS>(ntohs(pckt.getShort(1)));
+		error = static_cast<enum class TFTP_ERRORS>(ntohs(pckt.getShort(1)));
 		errorMsg.assign(pckt.getBuffer() + 4);
 	}
 	else
 	{
-		error = TFTP_ERR_MAX;
-		errorMsg.assign(TFTP_ERRMSG[error]);
+		error = TFTP_ERRORS::TFTP_ERR_MAX;
+		errorMsg.assign(TFTP_ERRMSG[(int)error]);
 	}
 
-	if ((type == TFTP_RRQ) || (type == TFTP_WRQ) || (type == TFTP_OACK))
+	if ((type == TFTP_PACKET_TYPE::TFTP_RRQ) || (type == TFTP_PACKET_TYPE::TFTP_WRQ) || (type == TFTP_PACKET_TYPE::TFTP_OACK))
 	{
 		pktlen -= 2;
 		bufpos = 2;
