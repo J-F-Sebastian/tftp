@@ -24,7 +24,7 @@
 
 #include "tftpPacket.h"
 
-TFTPPacket::TFTPPacket(char *ptr, unsigned size, bool releaseInDtor) : buffer(ptr), bufferSize(size), bufferTail(0), release(releaseInDtor)
+TFTPPacket::TFTPPacket(char *ptr, size_t size) : buffer(ptr), bufferSize(size), bufferTail(0)
 {
 	if (buffer && bufferSize)
 	{
@@ -39,12 +39,8 @@ TFTPPacket::TFTPPacket(char *ptr, unsigned size, bool releaseInDtor) : buffer(pt
 
 TFTPPacket::~TFTPPacket()
 {
-	if (release && buffer)
-		delete buffer;
-
 	buffer = nullptr;
 	bufferSize = bufferTail = 0;
-	release = false;
 }
 
 char *TFTPPacket::getBuffer()
@@ -52,7 +48,7 @@ char *TFTPPacket::getBuffer()
 	return buffer;
 }
 
-char *TFTPPacket::getBufferAtTail()
+char *TFTPPacket::getTail()
 {
 	return (bufferTail != bufferSize) ? (buffer + bufferTail) : (nullptr);
 }
@@ -130,7 +126,7 @@ int TFTPPacket::getWord(unsigned pos)
 	throw e;
 }
 
-bool TFTPPacket::addBuffer(const char *src, unsigned size)
+bool TFTPPacket::addBuffer(const char *src, size_t size)
 {
 	if (src && (bufferTail + size < bufferSize))
 	{
@@ -142,17 +138,17 @@ bool TFTPPacket::addBuffer(const char *src, unsigned size)
 	return false;
 }
 
-unsigned TFTPPacket::getBufferSize()
+size_t TFTPPacket::getBufferSize()
 {
 	return bufferSize;
 }
 
-unsigned TFTPPacket::getBufferTail()
+size_t TFTPPacket::getTailSize()
 {
 	return bufferTail;
 }
 
-void TFTPPacket::setBufferTail(unsigned val)
+void TFTPPacket::setBufferTail(size_t val)
 {
 	if (val <= bufferSize)
 		bufferTail = val;
@@ -160,9 +156,9 @@ void TFTPPacket::setBufferTail(unsigned val)
 		bufferTail = bufferSize;
 }
 
-void TFTPPacket::incBufferTail(unsigned val)
+void TFTPPacket::incBufferTail(size_t val)
 {
-	unsigned temp = bufferTail + val;
+	size_t temp = bufferTail + val;
 
 	if (temp > bufferSize)
 		temp = bufferSize;
@@ -170,7 +166,7 @@ void TFTPPacket::incBufferTail(unsigned val)
 	bufferTail = temp;
 }
 
-unsigned TFTPPacket::getBufferFreeOctets()
+size_t TFTPPacket::getBufferFreeOctets()
 {
 	return (bufferSize - bufferTail);
 }

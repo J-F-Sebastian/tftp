@@ -36,27 +36,24 @@ class TFTPPacket
 	 * its values range from 0 (beginning of a void buffer) to bufferSize
 	 * (beyond-the-end-of-buffer position).
 	 * bufferTail must be updated when writing data, so that it points to the last
-	 * valid octet available for writing.
+	 * valid octet available for writing (1 octet past the last written).
 	 * bufferTail equals the amount of octets written into the buffer.
 	 * Available free (writable) octets are computed subtracting bufferTail from
 	 * bufferSize.
 	 * When bufferTail equals bufferSize the buffer is full and cannot be updated anymore.
-	 * The buffer can be optionally released (deleted) in the constructor, but using this
-	 * option is STRONGLY DISCOURAGED !!! Use static buffers and reuse them, this improves
-	 * dramatically the performances of your code.
+	 * Buffer memory is provided by the caller and no memory management is performed
+	 * by TFTPPacket class.
 	 */
 
 	/* Pointer to the buffer */
 	char *buffer;
 	/* Size of the buffer, total amount of bytes available */
-	unsigned bufferSize;
+	size_t bufferSize;
 	/* Tail of the buffer, total amount of used bytes */
-	unsigned bufferTail;
-	/* Should the buffer be deallocated or not */
-	bool release;
+	size_t bufferTail;
 
 public:
-	TFTPPacket(char *ptr, unsigned size, bool releaseInDtor = false);
+	TFTPPacket(char *ptr, size_t size);
 	~TFTPPacket();
 
 	/*
@@ -70,14 +67,14 @@ public:
 	/*
 	 * Return a pointer to the tail of the internal buffer, i.e. the
 	 * first unused byte in the buffer.
-	 * If the buffer is full, the tail fall behind the allocated buffer,
+	 * If the buffer is full, the tail falls behind the allocated buffer,
 	 * the returned value is nullptr.
 	 *
 	 * RETURN
-	 * a valid pointer if the tail is lower than the buffer size.
+	 * a valid pointer if the tail is not at the end of the buffer.
 	 * nullptr if the buffer is full.
 	 */
-	char *getBufferAtTail(void);
+	char *getTail(void);
 
 	/*
 	 * Append an octet (byte) to the buffer, increasing the tail position.
@@ -127,7 +124,7 @@ public:
 	 * true if the octets were appended.
 	 * false if the buffer was full and the octets were not appended.
 	 */
-	bool addBuffer(const char *src, unsigned size);
+	bool addBuffer(const char *src, size_t size);
 
 	/*
 	 * Return an octet from the buffer at the specified position.
@@ -166,14 +163,14 @@ public:
 	 * RETURN
 	 * number of allocated bytes for the buffer
 	 */
-	unsigned getBufferSize(void);
+	size_t getBufferSize(void);
 	/*
 	 * Return the size of the buffer's tail in octets
 	 *
 	 * RETURN
 	 * number of used bytes in the buffer
 	 */
-	unsigned getBufferTail(void);
+	size_t getTailSize(void);
 	/*
 	 * Set the position of the buffer's tail in octets.
 	 * If the position is past the end of the buffer its value
@@ -182,7 +179,7 @@ public:
 	 * PARAMETER IN
 	 * position of the tail in the buffer
 	 */
-	void setBufferTail(unsigned val);
+	void setBufferTail(size_t val);
 	/*
 	 * Increase the position of the buffer's tail in octets.
 	 * If the position is past the end of the buffer its value
@@ -191,7 +188,7 @@ public:
 	 * PARAMETER IN
 	 * delta octets to be added to the tail position
 	 */
-	void incBufferTail(unsigned val);
+	void incBufferTail(size_t val);
 	/*
 	 * Return the amount of unused octets in the buffer.
 	 * Unused octets are past the tail, till the end of the buffer.
@@ -199,7 +196,7 @@ public:
 	 * RETURN
 	 * number of octets not used in the buffer
 	 */
-	unsigned getBufferFreeOctets(void);
+	size_t getBufferFreeOctets(void);
 
 	/*
 	 * Set the buffer tail to zero.
